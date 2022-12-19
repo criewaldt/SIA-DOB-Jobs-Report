@@ -1,26 +1,18 @@
 import requests, json, csv
+from datetime import date
 import os
 
 from config.settings import OPENDATA_APP_TOKEN
 APP_TOKEN = os.getenv("OPENDATA_APP_TOKEN") or OPENDATA_APP_TOKEN
 
-def pprint(json_item):
-    print(json.dumps(json_item, indent=4))
 
-OPENDATA_URLS = {
-    "complaints" : "https://data.cityofnewyork.us/resource/eabe-havv.json",
-    "ecb" : "https://data.cityofnewyork.us/resource/6bgk-3dad.json",
-    "violations" : "https://data.cityofnewyork.us/resource/3h2n-5cm9.json",
-    "now" : "https://data.cityofnewyork.us/resource/w9ak-ipjd.json",
-    "bis" : "https://data.cityofnewyork.us/resource/ic3t-wcy2.json",
-    "sign": "https://data.cityofnewyork.us/resource/nyis-y4yr.json",
-    "cofo": "https://data.cityofnewyork.us/resource/bs8b-p36w.json",
-}
+
 
 class GetJobsBySIA():
     def __init__(self, sia_number):
         self.sia_number = sia_number
         self.now_jobs = self.now()
+        self.make_report()
     
     def now(self, ):
         url = "https://data.cityofnewyork.us/resource/w9ak-ipjd.json"
@@ -32,8 +24,34 @@ class GetJobsBySIA():
         r = requests.get(url, params=payload)
         return r.json()
     
+    def make_report(self,):
+
+        today = date.today()
+        today = today.strftime("%Y-%m-%d")
+
+        # now we will open a file for writing
+        with open('{}-{}.csv'.format(self.sia_number, today), 'w') as data_file:
+        
+            # create the csv writer object
+            writer = csv.writer(data_file)
+
+            writer.writerow(["DOB Now Jobs With SIA# {}".format(self.sia_number)])
+            ###
+            try:
+                headers = list(self.now_jobs[0].keys())
+                writer.writerow(headers)
+                for job in self.now_jobs:
+                    r = []
+                    for h in headers:
+                        try:
+                            r.append(job[h])
+                        except:
+                            pass
+                    writer.writerow(r)
+            except IndexError:
+                writer.writerow(["Index Error: issue finding jobs... maybe none exist? If they do, contact Chris."])
+            ###
+    
 
 if __name__ == "__main__":
-    #binData = GetBin("1084455")
-    #d = GetBlockLot(520, 56)
     pass
