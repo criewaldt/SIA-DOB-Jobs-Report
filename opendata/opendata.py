@@ -30,7 +30,7 @@ class GetJobsBySIA():
         today = today.strftime("%Y-%m-%d")
 
         # now we will open a file for writing
-        with open('{}-{}.csv'.format(self.sia_number, today), 'w') as data_file:
+        with open('reports/{}-{}.csv'.format(self.sia_number, today), 'w') as data_file:
         
             # create the csv writer object
             writer = csv.writer(data_file)
